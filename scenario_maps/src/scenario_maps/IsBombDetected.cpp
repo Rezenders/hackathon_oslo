@@ -46,36 +46,66 @@ IsBombDetected::IsBombDetected(
   config().blackboard->get("node", node_);
 
   // FIX34 Create necessary Publishers and Subscripcions
+  detection_sub_  = node_->create_subscription<bombs_msgs::msg::BombDetection>(
+      "/bomb_detector", 10, std::bind(&IsBombDetected::bomb_detector_callback, this, _1));
 
   // FIX35 Read bombs and codes parameters
   // ...
   // don't forget global_frame, in case we are not in map frame
+  node_->declare_parameter("bomb_poses_x", bomb_poses_x_);
+  node_->declare_parameter("bomb_poses_y", bomb_poses_y_);
+  node_->get_parameter("bomb_poses_x", bomb_poses_x_);
+  node_->get_parameter("bomb_poses_y", bomb_poses_y_);
+
+  node_->declare_parameter("bombs", bombs_);
+  node_->declare_parameter("codes", codes_);
+  node_->get_parameter("bombs", bombs_);
+  node_->get_parameter("codes", codes_);
+
+  node_->declare_parameter("global_frame", global_frame_);
+  node_->get_parameter("global_frame", global_frame_);
 }
 
 // FIX36 Update last_detections_
-// void
-// IsBombDetected::bomb_detector_callback(const bombs_msgs::msg::BombDetection & msg)
-// {
-//   ...
-// }
+void
+IsBombDetected::bomb_detector_callback(const bombs_msgs::msg::BombDetection & msg)
+{
+  last_detections_[msg.bomb_id] = msg;
+}
 
 
 BT::NodeStatus
 IsBombDetected::tick()
 {
-  const bombs_msgs::msg::BombDetection bomb_to_disable;  // = ... ;
 
-  // FIX37 Update last_detections_
+  if (last_detections_.empty()) {
+    return BT::NodeStatus::FAILURE;
+  }
 
-  // FIX38 Check if bomb is visible (there is a TF to it)
-  // ..  tf_buffer_.lookupTransform(
+  bombs_msgs::msg::BombDetection bomb_to_disable;
+  float min_dist = 9999.0;
+  for(auto bomb: last_detections_){
+    if (bomb.second.distance < min_dist && bomb.second.status == bombs_msgs::msg::BombDetection::ENABLED){
+      bomb_to_disable = bomb.second;
+      min_dist = bomb.second.distance;
+    }
+  }
+  geometry_msgs::msg::PoseStamped wp;
+  wp.header.frame_id = global_frame_;
+  wp.pose.orientation.w = 1.0;
 
-  // FIX39 if visible
-  //  - Set ouput ports with bomb_id, code, and pose
-  //  - return BT::NodeStatus::SUCCESS
-  // Otherwise return BT::NodeStatus::FAILURE
+  std::string _code;
 
-  // setOutput("...", ...);
+  for (size_t i = 0; i < bombs_.size(); i++) {
+    if (bombs_[i] == bomb_to_disable.bomb_id) {
+      _code = bombs_[i] + "_" + codes_[i];
+      wp.pose.position.x = bomb_poses_x_[i];
+      wp.pose.position.y = bomb_poses_y_[i];
+    }
+  }
+  setOutput("code", _code);
+  setOutput("bomb_pose", wp);
+  setOutput("bomb_id", bomb_to_disable.bomb_id);
 
   RCLCPP_DEBUG_STREAM(node_->get_logger(), "IsBombDetected SUCCESS");
   return BT::NodeStatus::SUCCESS;

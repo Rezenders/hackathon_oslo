@@ -42,17 +42,20 @@ public:
     return BT::PortsList(
       {
         // FIX21 Create input port for bomb_id
+        BT::InputPort<std::string>("bomb_id"),
       });
   }
 
 private:
   // FIX27 Add callbacks Subscripcions
-  // void bomb_detector_callback(... msg);
+  void bomb_detector_callback(const bombs_msgs::msg::BombDetection &msg);
 
   rclcpp::Node::SharedPtr node_;
   // FIX28 Add necessary Publishers and Subscripcions
+  rclcpp::Subscription<bombs_msgs::msg::BombDetection>::SharedPtr detection_sub_;
 
-  std::vector<bombs_msgs::msg::BombDetection> last_detections_;
+  // std::vector<bombs_msgs::msg::BombDetection> last_detections_;
+  std::map<std::string, bombs_msgs::msg::BombDetection> last_detections_;
 };
 
 }  // namespace scenario_maps

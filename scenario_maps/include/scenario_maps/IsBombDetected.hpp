@@ -44,15 +44,19 @@ public:
     return BT::PortsList(
       {
         // FIX20 Create output port for code, bomb_id and bomb_pose
+        BT::OutputPort<std::string>("bomb_id"),
+        BT::OutputPort<geometry_msgs::msg::PoseStamped>("bomb_pose"),
+        BT::OutputPort<std::string>("code"),
       });
   }
 
 private:
   // FIX26 Add callbacks Subscripcions
-  // void bomb_detector_callback(... msg);
+  void bomb_detector_callback(const bombs_msgs::msg::BombDetection &msg);
 
   rclcpp::Node::SharedPtr node_;
   // FIX26 Add necessary Publishers and Subscripcions
+  rclcpp::Subscription<bombs_msgs::msg::BombDetection>::SharedPtr detection_sub_;
 
   std::shared_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_;
   tf2::BufferCore tf_buffer_;
@@ -62,8 +66,11 @@ private:
 
   std::vector<std::string> bombs_;
   std::vector<std::string> codes_;
+  std::vector<double> bomb_poses_x_;
+  std::vector<double> bomb_poses_y_;
 
-  std::vector<bombs_msgs::msg::BombDetection> last_detections_;
+  // std::vector<bombs_msgs::msg::BombDetection> last_detections_;
+  std::map<std::string, bombs_msgs::msg::BombDetection> last_detections_;
 };
 
 }  // namespace scenario_maps

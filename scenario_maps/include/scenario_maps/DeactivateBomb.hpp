@@ -41,6 +41,8 @@ public:
     return BT::PortsList(
       {
         // FIX19 Create input port for code and bomb_id
+        BT::InputPort<std::string>("bomb_id"),
+        BT::InputPort<std::string>("code"),
       });
   }
 
@@ -48,6 +50,8 @@ private:
   rclcpp::Node::SharedPtr node_;
 
   // FIX25 Add necessary Publishers and Subscripcions
+  rclcpp::Publisher<bombs_msgs::msg::OperateBomb>::SharedPtr bomb_operation_pub_;
+
 };
 
 }  // namespace scenario_maps

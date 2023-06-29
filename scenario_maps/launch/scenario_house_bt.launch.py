@@ -56,7 +56,7 @@ def generate_launch_description():
         parameters=[
           {'use_sim_time': True}
         ],
-        arguments=['-d', rviz_file], 
+        arguments=['-d', rviz_file],
         output='screen')
 
     ld = LaunchDescription()

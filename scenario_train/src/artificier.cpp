@@ -14,7 +14,7 @@
 
 #include "rclcpp/rclcpp.hpp"
 
-// #include ...
+#include "scenario_train/Artificier.hpp"
 
 using namespace std::chrono_literals;
 
@@ -23,8 +23,8 @@ int main(int argc, char * argv[])
   rclcpp::init(argc, argv);
 
   // FIX16 Create and Spin the artificer node
-  // auto node = ...
-  // rclcpp::spin(node);
+  auto node = scenario_train::Artificier::make_shared();
+  rclcpp::spin(node);
 
   rclcpp::shutdown();
   return 0;

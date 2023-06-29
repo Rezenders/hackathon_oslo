@@ -1,12 +1,40 @@
 <?xml version="1.0"?>
 <root main_tree_to_execute="BehaviorTree">
-    <!-- FIX47 do the Behavior Tree with Groot for disabling bombs with maps -->
+    <!-- ////////// -->
     <BehaviorTree ID="BehaviorTree">
-        <KeepRunningUntilFailure>
-            <AlwaysSuccess/>
-        </KeepRunningUntilFailure>
+        <Sequence>
+            <Condition ID="IsBombDetected" bomb_id="{bomb_id}" bomb_pose="{bomb_pose}" code="{bomb_code}"/>
+            <ReactiveFallback>
+                <Condition ID="IsBombNear" bomb_id="{bomb_id}"/>
+                <Action ID="Move" goal="{bomb_pose}"/>
+            </ReactiveFallback>
+            <Sequence>
+                <Condition ID="IsBombNear" bomb_id="{bomb_id}"/>
+                <Action ID="DeactivateBomb" bomb_id="{bomb_id}" code="{bomb_code}"/>
+            </Sequence>
+        </Sequence>
     </BehaviorTree>
     <!-- ////////// -->
-    <TreeNodesModel/>
+    <TreeNodesModel>
+        <Action ID="ApproachBomb">
+            <input_port name="bomb_id"/>
+        </Action>
+        <Action ID="DeactivateBomb">
+            <input_port name="bomb_id"/>
+            <input_port name="code"/>
+        </Action>
+        <Condition ID="IsBombDetected">
+            <output_port name="bomb_id"/>
+            <output_port name="bomb_pose"/>
+            <output_port name="code"/>
+        </Condition>
+        <Condition ID="IsBombNear">
+            <input_port name="bomb_id"/>
+        </Condition>
+        <Action ID="LookForBomb"/>
+        <Action ID="Move">
+            <input_port name="goal"/>
+        </Action>
+    </TreeNodesModel>
     <!-- ////////// -->
 </root>

@@ -44,7 +44,7 @@ protected:
   void control_cycle();
 
   // FIX05 Add callbacks Subscripcions
-  // void bomb_detector_callback(... msg);
+  void bomb_detector_callback(const bombs_msgs::msg::BombDetection &msg);
 
   void disable_bomb(const bombs_msgs::msg::BombDetection & bomb);
   bool is_visible(const bombs_msgs::msg::BombDetection & bomb);
@@ -53,12 +53,12 @@ protected:
 
 private:
   // FIX04 Add Publishers and Subscripcions
-  // ... detection_sub_;
-  // ... bomb_operation_pub_;
-  // ... vel_pub_;
+  rclcpp::Subscription<bombs_msgs::msg::BombDetection>::SharedPtr detection_sub_;
+  rclcpp::Publisher<bombs_msgs::msg::OperateBomb>::SharedPtr bomb_operation_pub_;
+  rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr vel_pub_;
 
   // FIX06 Add Timer fo the control cycle
-  // ... timer_;
+  rclcpp::TimerBase::SharedPtr timer_;
 
   std::shared_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_;
   tf2::BufferCore tf_buffer_;
@@ -67,9 +67,12 @@ private:
   std::vector<std::string> bombs_;
   std::vector<std::string> codes_;
 
-  std::vector<bombs_msgs::msg::BombDetection> last_detections_;
+  // std::vector<bombs_msgs::msg::BombDetection> last_detections_;
+  std::map<std::string, bombs_msgs::msg::BombDetection> last_detections_;
+  // std::vector<bombs_msgs::msg::BombDetection> last_detections_;
 
-  // ... Other members you need
+  double last_distance_ {100.0}, last_dx_ {0.0}, last_dv_{0.0};
+  geometry_msgs::msg::Twist last_vel_;
 };
 
 }  // namespace scenario_train

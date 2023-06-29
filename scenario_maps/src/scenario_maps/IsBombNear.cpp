@@ -38,14 +38,16 @@ IsBombNear::IsBombNear(
   config().blackboard->get("node", node_);
 
   // FIX40 Create necessary Publishers and Subscripcions
+  detection_sub_  = node_->create_subscription<bombs_msgs::msg::BombDetection>(
+      "/bomb_detector", 10, std::bind(&IsBombNear::bomb_detector_callback, this, _1));
 }
 
 // FIX41 Update last_detections_
-// void
-// IsBombNear::bomb_detector_callback(... msg)
-// {
-//   ...
-// }
+void
+IsBombNear::bomb_detector_callback(const bombs_msgs::msg::BombDetection &msg)
+{
+  last_detections_[msg.bomb_id] = msg;
+}
 
 BT::NodeStatus
 IsBombNear::tick()
@@ -54,8 +56,7 @@ IsBombNear::tick()
   getInput("bomb_id", bomb_id);
 
   // FIX42 get distance to the bomb
-  double distance = 1000.0;
-  // ...
+  double distance = last_detections_[bomb_id].distance;
 
   if (distance < 3.0) {
     RCLCPP_DEBUG_STREAM(node_->get_logger(), "IsBombNear SUCCESS");

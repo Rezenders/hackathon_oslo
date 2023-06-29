@@ -34,6 +34,7 @@ DeactivateBomb::DeactivateBomb(
   config().blackboard->get("node", node_);
 
   // FIX31 Create necessary Publishers and Subscripcions
+  bomb_operation_pub_ = node_->create_publisher<bombs_msgs::msg::OperateBomb>("/bombs_operation", 10);
 }
 
 void
@@ -45,10 +46,16 @@ BT::NodeStatus
 DeactivateBomb::tick()
 {
   // FIX32 Read bomb_id and code from input port
-  // ...
-  // getInput("...", ...);
+  std::string bomb_id_;
+  std::string bomb_code_;
 
   // FIX33 Send a message to disable a bomb
+  bombs_msgs::msg::OperateBomb msg;
+  msg.operation = bombs_msgs::msg::OperateBomb::DEACTIVATE;
+  msg.bomb_id = bomb_id_;
+  msg.code = bomb_code_;
+
+  bomb_operation_pub_->publish(msg);
 
   RCLCPP_DEBUG_STREAM(node_->get_logger(), "DeactivateBomb SUCCESS");
   return BT::NodeStatus::SUCCESS;

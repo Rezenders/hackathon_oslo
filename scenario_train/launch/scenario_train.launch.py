@@ -43,47 +43,47 @@ def generate_launch_description():
         executable='component_container',
         output='both',
     )
- 
-    # FIX01: Load component Artificier into de container 
-    # load_composable_nodes = LoadComposableNodes(
-    #     target_container=container_name,
-    #     composable_node_descriptions=[
-    #         ComposableNode(
-    #             package='...',
-    #             plugin='...',
-    #             name='artificier',
-    #             parameters=[
-    #               param_file,
-    #               {'use_sim_time': True}
-    #             ])
-    #     ])
+
+    # FIX01: Load component Artificier into de container
+    load_composable_nodes = LoadComposableNodes(
+        target_container=container_name,
+        composable_node_descriptions=[
+            ComposableNode(
+                package='scenario_train',
+                plugin='scenario_train::Artificier',
+                name='artificier',
+                parameters=[
+                  param_file,
+                  {'use_sim_time': True}
+                ])
+        ])
 
     # FIX02: Run executable bombs_spawn with param_file as parameter
-    # bombs_spawn_cmd = Node(
-    #     ...,
-    #     ...,
-    #     parameters=[
-    #       param_file,
-    #       {'use_sim_time': True}
-    #     ],
-    #     output='screen')
+    bombs_spawn_cmd = Node(
+        package='scenario_train',
+        executable='bombs_spawn',
+        parameters=[
+          param_file,
+          {'use_sim_time': True}
+        ],
+        output='screen')
 
     # FIX03: Run rviz2 with rviz_file as configuration
-    # rviz2_cmd = Node(
-    #     ...,
-    #     ...,
-    #     parameters=[
-    #       {'use_sim_time': True}
-    #     ],
-    #     arguments=..., 
-    #     output='screen')
+    rviz2_cmd = Node(
+        package='rviz2',
+        executable='rviz2',
+        parameters=[
+          {'use_sim_time': True}
+        ],
+        arguments=['-d', rviz_file],
+        output='screen')
 
     ld = LaunchDescription()
 
     ld.add_action(declare_container_name_cmd)
     ld.add_action(container_cmd)
-    # ld.add_action(load_composable_nodes)
-    # ld.add_action(bombs_spawn_cmd)
-    # ld.add_action(rviz2_cmd)
+    ld.add_action(load_composable_nodes)
+    ld.add_action(bombs_spawn_cmd)
+    ld.add_action(rviz2_cmd)
 
     return ld
